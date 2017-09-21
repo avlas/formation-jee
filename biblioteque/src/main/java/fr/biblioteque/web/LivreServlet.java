@@ -100,7 +100,7 @@ public class LivreServlet extends HttpServlet {
 			response.setContentType("application/json");
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"Livre was created succesfully !\"}");
+					+ " \", \"description\" : \"Livre was created !\"}");
 		}
 	}
 
@@ -113,40 +113,63 @@ public class LivreServlet extends HttpServlet {
 		if (livre == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livreo not found\"}");
+					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livre not found\"}");
 		} else {
 
 			String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
 			JSONObject bodyJson = new JSONObject(body);
 
-			Auteur auteur = new Auteur(bodyJson.getString("nom"), bodyJson.getString("prenom"),
-					bodyJson.getString("langue"), null);
+			Auteur auteur = auteurService.findById(Auteur.class, Integer.valueOf(bodyJson.getInt("auteur")));
+			if (auteur == null) {
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				response.getWriter()
+						.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Auteur not found\"}");
+			} else {
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/aaaa");
+				Date datePublication = null;
+				try {
+					datePublication = sdf.parse(bodyJson.getString("datePublication"));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				
+				livre.setTitre(bodyJson.getString("titre"));
+				livre.setDatePublication(datePublication);
+				livre.setDescription(bodyJson.getString("description"));
+				livre.setCategorie(bodyJson.getString("categorie"));
+				livre.setAuteur(auteur);
+				livre.setExemplaires(bodyJson.getInt("exemplaires"));
+				livre.setExemplairesDispo(bodyJson.getInt("exemplairesDispo"));
 
-			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/aaaa");
-			Date datePublication = null;
-			try {
-				datePublication = sdf.parse(bodyJson.getString("datePublication"));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			} catch (ParseException e) {
-				e.printStackTrace();
+				livreService.update(livre);
+
+				response.setStatus(HttpServletResponse.SC_OK);
+				response.getWriter().append("{\"status\": \" " + response.getStatus()
+						+ " \", \"description\" : \"Livre was updated !\"}");
+
 			}
+		}
+	}
+	
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
-			livre.setTitre(bodyJson.getString("titre"));
-			livre.setDatePublication(datePublication);
-			livre.setDescription(bodyJson.getString("description"));
-			livre.setCategorie(bodyJson.getString("categorie"));
-			livre.setAuteur(auteur);
-			livre.setExemplaires(bodyJson.getInt("exemplaires"));
-			livre.setExemplairesDispo(bodyJson.getInt("exemplairesDispo"));
+		response.setContentType("application/json");
 
-			livreService.update(livre);
+		Livre livre = livreService.findById(Livre.class, Integer.parseInt(request.getPathInfo().substring(1)));
+		if (livre == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.getWriter()
+					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livreo not found\"}");
+		} else {
+			livreService.delete(livre);
 
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"Livre was updated succesfully !\"}");
-
+					+ " \", \"description\" : \"Livre was deleted !\"}");
 		}
 	}
 

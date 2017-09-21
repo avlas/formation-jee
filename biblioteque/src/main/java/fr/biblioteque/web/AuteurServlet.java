@@ -100,7 +100,7 @@ public class AuteurServlet extends HttpServlet {
 			response.setContentType("application/json");
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"The auteur was created succesfully !\"}");
+					+ " \", \"description\" : \"The auteur was created !\"}");
 		}
 	}
 
@@ -167,7 +167,7 @@ public class AuteurServlet extends HttpServlet {
 
 				response.setStatus(HttpServletResponse.SC_OK);
 				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"The auteur was updated succesfully !\"}");
+						+ " \", \"description\" : \"The auteur was updated !\"}");
 			}
 		}
 	}
@@ -187,7 +187,7 @@ public class AuteurServlet extends HttpServlet {
 
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"The auteur was updated succesfully !\"}");
+					+ " \", \"description\" : \"The auteur was deleted !\"}");
 		}
 	}
 }
