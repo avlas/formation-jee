@@ -33,8 +33,7 @@ public class LivresServlet extends HttpServlet {
 
 		List<Livre> livres = service.findAll("from Livre", Livre.class);		
 			
-		JSONObject livresObj = new JSONObject();	
-			
+		JSONObject livresObj = new JSONObject();				
 		JSONArray livresArray = new JSONArray();
 		for (Livre livre : livres) {
 			JSONObject livreObj = new JSONObject();			
@@ -60,6 +59,7 @@ public class LivresServlet extends HttpServlet {
 			livresArray.put(livreObj);	
 		}
 		livresObj.put("livres", livresArray);
+		
 		response.getWriter().append(livresObj.toString());
 	}
 

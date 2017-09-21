@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,43 +43,34 @@ public class LivreServlet extends HttpServlet {
 			response.getWriter()
 					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livre not found\"}");
 		} else {
-			JSONObject livresJson = new JSONObject();
-
-			JSONArray livresArray = new JSONArray();
-
-			JSONObject livreJson = new JSONObject();
-			livreJson.put("id", livre.getId());
-			livreJson.put("titre", livre.getTitre());
-			livreJson.put("datePublication", livre.getDatePublication());
-			livreJson.put("description", livre.getDescription());
-			livreJson.put("categorie", livre.getCategorie());
+			JSONObject livreObj = new JSONObject();
+			livreObj.put("id", livre.getId());
+			livreObj.put("titre", livre.getTitre());
+			livreObj.put("datePublication", livre.getDatePublication());
+			livreObj.put("description", livre.getDescription());
+			livreObj.put("categorie", livre.getCategorie());
 
 			Auteur auteur = livre.getAuteur();
 
-			JSONObject auteursJson = new JSONObject();
-			JSONArray auteurArray = new JSONArray();
 			JSONObject auteurJson = new JSONObject();
 			auteurJson.put("id", auteur.getId());
 			auteurJson.put("nom", auteur.getNom());
 			auteurJson.put("prenom", auteur.getPrenom());
 			auteurJson.put("langue", auteur.getLangue());
-			auteurArray.put(auteurJson);
-			auteursJson.put("auteurs", auteurArray);
 
-			livreJson.put("exemplaires", livre.getExemplaires());
-			livreJson.put("exemplairesDispo", livre.getExemplairesDispo());
+			livreObj.put("auteur", auteurJson);
+			livreObj.put("exemplaires", livre.getExemplaires());
+			livreObj.put("exemplairesDispo", livre.getExemplairesDispo());
 
-			livresArray.put(livreJson);
-
-			livresJson.put("livres", livresArray);
-
-			response.getWriter().append(livresJson.toString());
+			response.getWriter().append(livreObj.toString());
 		}
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		response.setContentType("application/json");
+		
 		String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
 		JSONObject jsonObj = new JSONObject(body);
@@ -116,7 +106,9 @@ public class LivreServlet extends HttpServlet {
 
 	protected void doPut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		
+		response.setContentType("application/json");
+		
 		Livre livre = livreService.findById(Livre.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (livre == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
