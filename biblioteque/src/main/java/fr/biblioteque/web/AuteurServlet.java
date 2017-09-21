@@ -20,10 +20,10 @@ import fr.biblioteque.dao.entity.Auteur;
 public class AuteurServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private GenericService<Auteur> service;
+	private GenericService<Auteur> auteurService;
 
 	public AuteurServlet() {
-		service = new GenericServiceImpl<Auteur>();
+		auteurService = new GenericServiceImpl<Auteur>();
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -31,7 +31,7 @@ public class AuteurServlet extends HttpServlet {
 
 		response.setContentType("application/json");
 
-		Auteur auteur = service.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
+		Auteur auteur = auteurService.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (auteur == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
@@ -94,7 +94,7 @@ public class AuteurServlet extends HttpServlet {
 			response.getWriter().append("{\"status\": \" " + response.getStatus()
 					+ " \", \"description\" : \"You must give a value for the parameter 'prenom'! \"}");
 		} else {
-			service.insert(new Auteur(bodyJson.getString("nom"), bodyJson.getString("prenom"),
+			auteurService.insert(new Auteur(bodyJson.getString("nom"), bodyJson.getString("prenom"),
 					bodyJson.getString("langue"), null));
 
 			response.setContentType("application/json");
@@ -109,7 +109,7 @@ public class AuteurServlet extends HttpServlet {
 
 		response.setContentType("application/json");
 
-		Auteur auteur = service.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
+		Auteur auteur = auteurService.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (auteur == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
@@ -163,7 +163,7 @@ public class AuteurServlet extends HttpServlet {
 				auteur.setPrenom(prenom);
 				auteur.setLangue(langue);
 
-				service.update(auteur);
+				auteurService.update(auteur);
 
 				response.setStatus(HttpServletResponse.SC_OK);
 				response.getWriter().append("{\"status\": \" " + response.getStatus()
@@ -177,13 +177,13 @@ public class AuteurServlet extends HttpServlet {
 
 		response.setContentType("application/json");
 
-		Auteur auteur = service.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
+		Auteur auteur = auteurService.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (auteur == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
 					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Auteur not found\"}");
 		} else {
-			service.delete(auteur);
+			auteurService.delete(auteur);
 
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.getWriter().append("{\"status\": \" " + response.getStatus()

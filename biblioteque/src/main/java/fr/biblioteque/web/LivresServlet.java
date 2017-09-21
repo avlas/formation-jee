@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import fr.biblioteque.business.LivreService;
-import fr.biblioteque.business.LivreServiceImpl;
+import fr.biblioteque.business.GenericService;
+import fr.biblioteque.business.GenericServiceImpl;
 import fr.biblioteque.dao.entity.Auteur;
 import fr.biblioteque.dao.entity.Livre;
 
@@ -21,40 +21,46 @@ import fr.biblioteque.dao.entity.Livre;
 public class LivresServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private LivreService service;
+	private GenericService<Livre> service;
 	
 	public LivresServlet() {
-		service = new LivreServiceImpl();
+		service = new GenericServiceImpl<Livre>();
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.setContentType("text/html");
 
-		List<Livre> livres = service.findAll();		
-
+		List<Livre> livres = service.findAll("from Livre", Livre.class);		
+			
+		JSONObject livresObj = new JSONObject();	
+			
 		JSONArray livresArray = new JSONArray();
 		for (Livre livre : livres) {
-			livresArray.put(new JSONObject().put("id", livre.getId()));
-			livresArray.put(new JSONObject().put("titre", livre.getTitre()));
-			livresArray.put(new JSONObject().put("datePublication", livre.getDatePublication()));
-			livresArray.put(new JSONObject().put("description", livre.getDescription()));
-			livresArray.put(new JSONObject().put("categorie", livre.getCategorie()));
+			JSONObject livreObj = new JSONObject();			
+		
+			livreObj.put("id", livre.getId());
+			livreObj.put("titre", livre.getTitre());
+			livreObj.put("datePublication", livre.getDatePublication());
+			livreObj.put("description", livre.getDescription());
+			livreObj.put("categorie", livre.getCategorie());
 			
 			Auteur auteur = livre.getAuteur();
 			
-			JSONArray auteurArray = new JSONArray();	
-			auteurArray.put(new JSONObject().put("id", auteur.getId()));
-			auteurArray.put(new JSONObject().put("nom", auteur.getNom()));
-			auteurArray.put(new JSONObject().put("prenom", auteur.getPrenom()));
-			auteurArray.put(new JSONObject().put("langue", auteur.getLangue()));			
-			livresArray.put(auteurArray);		
+			JSONObject auteurJson = new JSONObject();	
+			auteurJson.put("id", auteur.getId());
+			auteurJson.put("nom", auteur.getNom());
+			auteurJson.put("prenom", auteur.getPrenom());
+			auteurJson.put("langue", auteur.getLangue());			
 			
-			livresArray.put(new JSONObject().put("exemplaires", livre.getExemplaires()));
-			livresArray.put(new JSONObject().put("exemplairesDispo", livre.getExemplairesDispo()));
+			livreObj.put("auteur", auteurJson);
+			livreObj.put("exemplaires", livre.getExemplaires());
+			livreObj.put("exemplairesDispo", livre.getExemplairesDispo());
+			
+			livresArray.put(livreObj);	
 		}
-		
-		response.getWriter().append(livresArray.toString());
+		livresObj.put("livres", livresArray);
+		response.getWriter().append(livresObj.toString());
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
