@@ -1,0 +1,5 @@
+CREATE DATABASE IF NOT EXISTS `bibliotheque`;
+USE `bibliotheque`;
+
+CREATE USER `avl`@'%' IDENTIFIED BY '1234';
+GRANT SELECT,INSERT,UPDATE,DELETE,DROP,CREATE ON `bibliotheque`.* TO 'avl'@'%';
