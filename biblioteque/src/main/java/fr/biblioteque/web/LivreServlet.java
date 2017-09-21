@@ -163,7 +163,7 @@ public class LivreServlet extends HttpServlet {
 		if (livre == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livreo not found\"}");
+					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livre not found\"}");
 		} else {
 			livreService.delete(livre);
 
