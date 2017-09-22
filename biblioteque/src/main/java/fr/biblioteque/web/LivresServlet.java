@@ -22,7 +22,7 @@ public class LivresServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private GenericService<Livre> service;
-	
+
 	public LivresServlet() {
 		service = new GenericServiceImpl<Livre>();
 	}
@@ -30,35 +30,52 @@ public class LivresServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		List<Livre> livres = service.findAll("from Livre", Livre.class);		
-			
-		JSONObject livresObj = new JSONObject();				
+		List<Livre> livres = null;
+
+		if (request.getQueryString() != null) {
+			String url = request.getQueryString();
+
+			String[] paramParts = url.split("&");
+			for (String part : paramParts) {
+				String[] parts = part.split("=");
+				String key = parts[0];
+				String value = parts[1];
+
+				if (key.equalsIgnoreCase("categ")) {
+					livres = service.findByCategorie(value);
+				}
+			}
+		} else {
+			livres = service.findAll("from Livre", Livre.class);
+		}
+
+		JSONObject livresObj = new JSONObject();
 		JSONArray livresArray = new JSONArray();
 		for (Livre livre : livres) {
-			JSONObject livreObj = new JSONObject();		
-		
+			JSONObject livreObj = new JSONObject();
+
 			livreObj.put("id", livre.getId());
 			livreObj.put("titre", livre.getTitre());
 			livreObj.put("datePublication", livre.getDatePublication());
 			livreObj.put("description", livre.getDescription());
 			livreObj.put("categorie", livre.getCategorie());
-			
+
 			Auteur auteur = livre.getAuteur();
-			
-			JSONObject auteurJson = new JSONObject();	
+
+			JSONObject auteurJson = new JSONObject();
 			auteurJson.put("id", auteur.getId());
 			auteurJson.put("nom", auteur.getNom());
 			auteurJson.put("prenom", auteur.getPrenom());
-			auteurJson.put("langue", auteur.getLangue());			
-			
+			auteurJson.put("langue", auteur.getLangue());
+
 			livreObj.put("auteur", auteurJson);
 			livreObj.put("exemplaires", livre.getExemplaires());
 			livreObj.put("exemplairesDispo", livre.getExemplairesDispo());
-			
-			livresArray.put(livreObj);	
+
+			livresArray.put(livreObj);
 		}
-		livresObj.put("livres", livresArray);		
-		
+		livresObj.put("livres", livresArray);
+
 		response.setContentType("application/json");
 		response.getWriter().append(livresObj.toString());
 	}

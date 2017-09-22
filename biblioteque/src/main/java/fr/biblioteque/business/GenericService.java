@@ -3,6 +3,7 @@ package fr.biblioteque.business;
 import java.util.List;
 
 import fr.biblioteque.dao.entity.Auteur;
+import fr.biblioteque.dao.entity.Livre;
 
 public interface GenericService<T> {
 	
@@ -17,4 +18,6 @@ public interface GenericService<T> {
 	void delete(T t);
 	
 	List<Auteur> findByLangue(String langue);
+	
+	List<Livre> findByCategorie(String categorie);
 }

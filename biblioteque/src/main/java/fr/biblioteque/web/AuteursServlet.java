@@ -33,7 +33,6 @@ public class AuteursServlet extends HttpServlet {
 		
 		if (request.getQueryString() != null) {
 			String url = request.getQueryString();
-			System.out.println("URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL" + url);
 
 			String[] paramParts = url.split("&");
 			for (String part : paramParts) {

@@ -8,10 +8,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="livre")
+@NamedQuery(name="livre.findByCategorie", query="select l from Livre l where l.categorie=:categorie")
 public class Livre {
 	
 	@Id
