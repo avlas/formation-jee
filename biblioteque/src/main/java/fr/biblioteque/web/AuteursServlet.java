@@ -16,50 +16,55 @@ import fr.biblioteque.business.GenericService;
 import fr.biblioteque.business.GenericServiceImpl;
 import fr.biblioteque.dao.entity.Auteur;
 
-@WebServlet("/auteurs")
+@WebServlet(urlPatterns = { "/auteurs", "/auteurs?*" })
 public class AuteursServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private GenericService<Auteur> service;
-	
+
 	public AuteursServlet() {
 		service = new GenericServiceImpl<Auteur>();
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
+		List<Auteur> auteurs = null;
 		
-		response.setContentType("application/json");
+		if (request.getQueryString() != null) {
+			String url = request.getQueryString();
+			System.out.println("URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL" + url);
+
+			String[] paramParts = url.split("&");
+			for (String part : paramParts) {
+				String[] parts = part.split("=");
+				String key = parts[0];
+				String value = parts[1];
+				
+				if(key.equalsIgnoreCase("lang")) {
+					auteurs = service.findByLangue(value);
+				}				
+			}
+		} else {
+			auteurs = service.findAll("from Auteur", Auteur.class);
+		}
 		
-		List<Auteur> auteurs = service.findAll("from Auteur", Auteur.class);
-		
-		JSONObject auteursObj = new JSONObject();	
-		
-		JSONArray auteursArray = new JSONArray();	
-		for (Auteur auteur : auteurs) {	
+		JSONObject auteursObj = new JSONObject();
+
+		JSONArray auteursArray = new JSONArray();
+		for (Auteur auteur : auteurs) {
+
 			JSONObject auteurObj = new JSONObject();
-			
 			auteurObj.put("id", auteur.getId());
 			auteurObj.put("nom", auteur.getNom());
 			auteurObj.put("prenom", auteur.getPrenom());
 			auteurObj.put("langue", auteur.getLangue());
-			
-/*			JSONArray livresArray = new JSONArray();
-			for (Livre livre : auteur.getLivres()) {
-				livresArray.put(new JSONObject().put("id", livre.getId()));
-				livresArray.put(new JSONObject().put("titre", livre.getTitre()));
-				livresArray.put(new JSONObject().put("datePublication", livre.getDatePublication()));
-				livresArray.put(new JSONObject().put("description", livre.getDescription()));
-				livresArray.put(new JSONObject().put("categorie", livre.getCategorie()));
-				livresArray.put(new JSONObject().put("exemplaires", livre.getExemplaires()));
-				livresArray.put(new JSONObject().put("exemplairesDispo", livre.getExemplairesDispo()));
-			}
-			auteurObj.put("livres", livresArray);*/
 
-			auteursArray.put(auteurObj);			
+			auteursArray.put(auteurObj);
 		}
 		auteursObj.put("auteurs", auteursArray);
-		
+
+		response.setContentType("application/json");
 		response.getWriter().append(auteursObj.toString());
 	}
 }

@@ -17,7 +17,7 @@ import fr.biblioteque.business.GenericServiceImpl;
 import fr.biblioteque.dao.entity.Auteur;
 import fr.biblioteque.dao.entity.Livre;
 
-@WebServlet("/livres")
+@WebServlet(urlPatterns = { "/livres", "/livres?*" })
 public class LivresServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -29,14 +29,13 @@ public class LivresServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		response.setContentType("text/html");
 
 		List<Livre> livres = service.findAll("from Livre", Livre.class);		
 			
 		JSONObject livresObj = new JSONObject();				
 		JSONArray livresArray = new JSONArray();
 		for (Livre livre : livres) {
-			JSONObject livreObj = new JSONObject();			
+			JSONObject livreObj = new JSONObject();		
 		
 			livreObj.put("id", livre.getId());
 			livreObj.put("titre", livre.getTitre());
@@ -58,8 +57,9 @@ public class LivresServlet extends HttpServlet {
 			
 			livresArray.put(livreObj);	
 		}
-		livresObj.put("livres", livresArray);
+		livresObj.put("livres", livresArray);		
 		
+		response.setContentType("application/json");
 		response.getWriter().append(livresObj.toString());
 	}
 

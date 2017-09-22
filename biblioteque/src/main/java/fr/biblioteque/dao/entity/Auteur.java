@@ -7,11 +7,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="auteur")
+@NamedQuery(name="auteur.findByLangue", query="select a from Auteur a where a.langue=:langue")
 public class Auteur {
 
 	@Id

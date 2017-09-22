@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.TypedQuery;
 
 import fr.biblioteque.dao.EntityManagerInstance;
+import fr.biblioteque.dao.entity.Auteur;
 
 public class GenericServiceImpl<T> implements GenericService<T> {
 
@@ -21,6 +22,10 @@ public class GenericServiceImpl<T> implements GenericService<T> {
 		return t;
 	}
 
+	public List<Auteur> findByLangue(String langue) {
+		return EntityManagerInstance.getInstance().createNamedQuery("auteur.findByLangue", Auteur.class).setParameter("langue", langue).getResultList();
+	}
+	
 	public void insert(T t) {
 		EntityManagerInstance.getInstance().getTransaction().begin();
 		

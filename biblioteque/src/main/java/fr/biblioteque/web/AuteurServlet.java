@@ -28,17 +28,16 @@ public class AuteurServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		
 		response.setContentType("application/json");
-
+		
 		Auteur auteur = auteurService.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (auteur == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Auteur not found\"}");
+					.append("{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Auteur not found\"}");
 		} else {
 			JSONObject auteurJson = new JSONObject();
-
 			auteurJson.put("id", auteur.getId());
 			auteurJson.put("nom", auteur.getNom());
 			auteurJson.put("prenom", auteur.getPrenom());
@@ -50,8 +49,13 @@ public class AuteurServlet extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		
+		response.setContentType("application/json");
+		
+		// recuperer le BODY, qui contient les parametres a inserer
 		String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+		
+		// transformer en JSON
 		JSONObject bodyJson = new JSONObject(body);
 
 		String nom = null;
@@ -59,8 +63,8 @@ public class AuteurServlet extends HttpServlet {
 			nom = bodyJson.getString("nom");
 		} catch (JSONException e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"You must give the parameter 'nom'! \"}");
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'nom'! \"}");
 		}
 
 		String prenom = null;
@@ -68,8 +72,8 @@ public class AuteurServlet extends HttpServlet {
 			prenom = bodyJson.getString("prenom");
 		} catch (JSONException e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"You must give the parameter 'prenom'! \"}");
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'prenom'! \"}");
 		}
 
 		String langue = null;
@@ -77,43 +81,43 @@ public class AuteurServlet extends HttpServlet {
 			langue = bodyJson.getString("langue");
 		} catch (JSONException e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"You must give the parameter 'langue'! \"}");
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'langue'! \"}");
 		}
 
 		if (nom.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"You must give a value for the parameter 'nom'! \"}");
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'nom'! \"}");
 		} else if (langue.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"You must give a value for the parameter 'langue'! \"}");
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'langue'! \"}");
 		} else if (prenom.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"You must give a value for the parameter 'prenom'! \"}");
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'prenom'! \"}");
 		} else {
 			auteurService.insert(new Auteur(bodyJson.getString("nom"), bodyJson.getString("prenom"),
 					bodyJson.getString("langue"), null));
 
-			response.setContentType("application/json");
-			response.setStatus(HttpServletResponse.SC_CREATED);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"The auteur was created !\"}");
+			response.setStatus(HttpServletResponse.SC_CREATED);			
+
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"Auteur was created !\"}");
 		}
 	}
 
 	protected void doPut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		
 		response.setContentType("application/json");
-
+		
 		Auteur auteur = auteurService.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (auteur == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Auteur not found\"}");
+					.append("{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Auteur not found\"}");
 		} else {
 
 			String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
@@ -124,8 +128,8 @@ public class AuteurServlet extends HttpServlet {
 				nom = bodyJson.getString("nom");
 			} catch (JSONException e) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"You must give the parameter 'nom'! \"}");
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'nom'! \"}");
 			}
 
 			String prenom = null;
@@ -133,8 +137,8 @@ public class AuteurServlet extends HttpServlet {
 				prenom = bodyJson.getString("prenom");
 			} catch (JSONException e) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"You must give the parameter 'prenom'! \"}");
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'prenom'! \"}");
 			}
 
 			String langue = null;
@@ -142,22 +146,22 @@ public class AuteurServlet extends HttpServlet {
 				langue = bodyJson.getString("langue");
 			} catch (JSONException e) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"You must give the parameter 'langue'! \"}");
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'langue'! \"}");
 			}
 
 			if (nom.isEmpty()) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"You must give a value for the parameter 'nom'! \"}");
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'nom'! \"}");
 			} else if (prenom.isEmpty()) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"You must give a value for the parameter 'prenom'! \"}");
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'prenom'! \"}");
 			} else if (langue.isEmpty()) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"You must give a value for the parameter 'langue'! \"}");
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'langue'! \"}");
 			} else {
 				auteur.setNom(nom);
 				auteur.setPrenom(prenom);
@@ -165,9 +169,10 @@ public class AuteurServlet extends HttpServlet {
 
 				auteurService.update(auteur);
 
-				response.setStatus(HttpServletResponse.SC_OK);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"The auteur was updated !\"}");
+				response.setStatus(HttpServletResponse.SC_OK);				
+
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"Auteur was updated !\"}");
 			}
 		}
 	}
@@ -175,19 +180,20 @@ public class AuteurServlet extends HttpServlet {
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		response.setContentType("application/json");
+		response.setContentType("application/json");		
 
 		Auteur auteur = auteurService.findById(Auteur.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (auteur == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Auteur not found\"}");
+					.append("{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Auteur not found\"}");
 		} else {
 			auteurService.delete(auteur);
 
-			response.setStatus(HttpServletResponse.SC_OK);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"The auteur was deleted !\"}");
+			response.setStatus(HttpServletResponse.SC_OK);			
+
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"Auteur was deleted !\"}");
 		}
 	}
 }

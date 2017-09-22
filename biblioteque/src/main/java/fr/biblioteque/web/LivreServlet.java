@@ -37,32 +37,46 @@ public class LivreServlet extends HttpServlet {
 
 		response.setContentType("application/json");
 
-		Livre livre = livreService.findById(Livre.class, Integer.parseInt(request.getPathInfo().substring(1)));
+		String livreIdFromUrl = request.getPathInfo().substring(1);		
+		Livre livre = livreService.findById(Livre.class, Integer.parseInt(livreIdFromUrl));
 		if (livre == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livre not found\"}");
+					.append("{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Livre not found\"}");
 		} else {
-			JSONObject livreObj = new JSONObject();
-			livreObj.put("id", livre.getId());
-			livreObj.put("titre", livre.getTitre());
-			livreObj.put("datePublication", livre.getDatePublication());
-			livreObj.put("description", livre.getDescription());
-			livreObj.put("categorie", livre.getCategorie());
+			JSONObject livreJsonObj = new JSONObject();
+			livreJsonObj.put("id", livre.getId());
+			livreJsonObj.put("titre", livre.getTitre());			
+
+			Date datePublication = livre.getDatePublication();
+			
+			String datePublicationStr = null;
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			try {
+				datePublicationStr = sdf.format(datePublication);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			livreJsonObj.put("datePublication", datePublicationStr);
+			
+			livreJsonObj.put("description", livre.getDescription());
+			livreJsonObj.put("categorie", livre.getCategorie());
 
 			Auteur auteur = livre.getAuteur();
 
-			JSONObject auteurJson = new JSONObject();
-			auteurJson.put("id", auteur.getId());
-			auteurJson.put("nom", auteur.getNom());
-			auteurJson.put("prenom", auteur.getPrenom());
-			auteurJson.put("langue", auteur.getLangue());
+			JSONObject auteurJsonObj = new JSONObject();
+			auteurJsonObj.put("id", auteur.getId());
+			auteurJsonObj.put("nom", auteur.getNom());
+			auteurJsonObj.put("prenom", auteur.getPrenom());
+			auteurJsonObj.put("langue", auteur.getLangue());
 
-			livreObj.put("auteur", auteurJson);
-			livreObj.put("exemplaires", livre.getExemplaires());
-			livreObj.put("exemplairesDispo", livre.getExemplairesDispo());
+			livreJsonObj.put("auteur", auteurJsonObj);
+			livreJsonObj.put("exemplaires", livre.getExemplaires());
+			livreJsonObj.put("exemplairesDispo", livre.getExemplairesDispo());
 
-			response.getWriter().append(livreObj.toString());
+			response.getWriter().append(livreJsonObj.toString());
 		}
 	}
 
@@ -70,106 +84,298 @@ public class LivreServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		response.setContentType("application/json");
-		
+
+		// recuperer le BODY, qui contient les parametres a inserer
 		String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
-		JSONObject jsonObj = new JSONObject(body);
+		// transformer en JSON
+		JSONObject bodyJsonObj = new JSONObject(body);
 
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/aaaa");
-		Date datePublication = null;
+		String titre = null;
 		try {
-			datePublication = sdf.parse(jsonObj.getString("datePublication"));
+			titre = bodyJsonObj.getString("titre");
 		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'titre' ! \"}");
 		}
 
-		Auteur auteur = auteurService.findById(Auteur.class, Integer.valueOf(jsonObj.getInt("auteur")));
-		if (auteur == null) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Auteur not found\"}");
+		String datePublicationStr = null;
+		try {
+			datePublicationStr = bodyJsonObj.getString("datePublication");
+		} catch (JSONException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'datePublication'! \"}");
+		}
+
+		String description = null;
+		try {
+			description = bodyJsonObj.getString("description");
+		} catch (JSONException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'description'! \"}");
+		}
+
+		String categorie = null;
+		try {
+			categorie = bodyJsonObj.getString("categorie");
+		} catch (JSONException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'categorie'! \"}");
+		}
+
+		int auteurId = 0;
+		try {
+			auteurId = bodyJsonObj.getInt("auteur");
+		} catch (JSONException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'auteur id'! \"}");
+		}
+
+		int exemplaires = 0;
+		try {
+			exemplaires = bodyJsonObj.getInt("exemplaires");
+		} catch (JSONException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'exemplaires'! \"}");
+		}
+
+		int exemplairesDispo = 0;
+		try {
+			exemplairesDispo = bodyJsonObj.getInt("exemplairesDispo");
+		} catch (JSONException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give the parameter 'exemplairesDispo'! \"}");
+		}
+
+		if (titre.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'titre'! \"}");
+		} else if (datePublicationStr.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'datePublication'! \"}");
+		} else if (description.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'description'! \"}");
+		} else if (categorie.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'categorie'! \"}");
+		} else if (auteurId == 0) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'auteur'! \"}");
+		} else if (exemplaires == 0) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'exemplaires'! \"}");
+		} else if (exemplairesDispo == 0) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().append("{\"status\": \"" + response.getStatus()
+					+ "\", \"description\" : \"You must give a value for the parameter 'exemplairesDispo'! \"}");
 		} else {
-			Livre livre = new Livre(jsonObj.getString("titre"), datePublication, jsonObj.getString("description"),
-					jsonObj.getString("categorie"), auteur, jsonObj.getInt("exemplaires"),
-					jsonObj.getInt("exemplairesDispo"));
 
-			livreService.insert(livre);
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			Date datePublication = null;
+			try {
+				datePublication = sdf.parse(datePublicationStr);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
 
-			response.setContentType("application/json");
-			response.setStatus(HttpServletResponse.SC_CREATED);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"Livre was created !\"}");
+			Auteur auteur = auteurService.findById(Auteur.class, Integer.valueOf(auteurId));
+			if (auteur == null) {
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				response.getWriter().append(
+						"{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Auteur not found\"}");
+			} else {
+				Livre livre = new Livre(titre, datePublication, description, categorie, auteur, exemplaires,
+						exemplairesDispo);
+
+				livreService.insert(livre);
+
+				response.setStatus(HttpServletResponse.SC_CREATED);
+
+				response.getWriter().append(
+						"{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Livre was created !\"}");
+			}
 		}
 	}
 
 	protected void doPut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+
 		response.setContentType("application/json");
-		
+
 		Livre livre = livreService.findById(Livre.class, Integer.parseInt(request.getPathInfo().substring(1)));
 		if (livre == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livre not found\"}");
+					.append("{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Livre not found\"}");
 		} else {
 
 			String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
 
-			JSONObject bodyJson = new JSONObject(body);
+			JSONObject bodyJsonObj = new JSONObject(body);
 
-			Auteur auteur = auteurService.findById(Auteur.class, Integer.valueOf(bodyJson.getInt("auteur")));
-			if (auteur == null) {
-				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				response.getWriter()
-						.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Auteur not found\"}");
+			String titre = null;
+			try {
+				titre = bodyJsonObj.getString("titre");
+			} catch (JSONException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'titre'! \"}");
+			}
+
+			String datePublicationStr = null;
+			try {
+				datePublicationStr = bodyJsonObj.getString("datePublication");
+			} catch (JSONException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'datePublication'! \"}");
+			}
+
+			String description = null;
+			try {
+				description = bodyJsonObj.getString("description");
+			} catch (JSONException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'description'! \"}");
+			}
+
+			String categorie = null;
+			try {
+				categorie = bodyJsonObj.getString("categorie");
+			} catch (JSONException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'categorie'! \"}");
+			}
+
+			int auteurId = 0;
+			try {
+				auteurId = bodyJsonObj.getInt("auteur");
+			} catch (JSONException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'auteur'! \"}");
+			}
+
+			int exemplaires = 0;
+			try {
+				exemplaires = bodyJsonObj.getInt("exemplaires");
+			} catch (JSONException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'exemplaires'! \"}");
+			}
+
+			int exemplairesDispo = 0;
+			try {
+				exemplairesDispo = bodyJsonObj.getInt("exemplairesDispo");
+			} catch (JSONException e) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give the parameter 'exemplairesDispo'! \"}");
+			}
+
+			if (titre.isEmpty()) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'titre'! \"}");
+			} else if (datePublicationStr.isEmpty()) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'datePublication'! \"}");
+			} else if (description.isEmpty()) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'description'! \"}");
+			} else if (categorie.isEmpty()) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'categorie'! \"}");
+			} else if (auteurId == 0) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'auteur'! \"}");
+			} else if (exemplaires == 0) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'exemplaires'! \"}");
+			} else if (exemplairesDispo == 0) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().append("{\"status\": \"" + response.getStatus()
+						+ "\", \"description\" : \"You must give a value for the parameter 'exemplairesDispo'! \"}");
 			} else {
-				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/aaaa");
+				
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 				Date datePublication = null;
 				try {
-					datePublication = sdf.parse(bodyJson.getString("datePublication"));
+					datePublication = sdf.parse(datePublicationStr);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-				
-				livre.setTitre(bodyJson.getString("titre"));
-				livre.setDatePublication(datePublication);
-				livre.setDescription(bodyJson.getString("description"));
-				livre.setCategorie(bodyJson.getString("categorie"));
-				livre.setAuteur(auteur);
-				livre.setExemplaires(bodyJson.getInt("exemplaires"));
-				livre.setExemplairesDispo(bodyJson.getInt("exemplairesDispo"));
 
-				livreService.update(livre);
+				Auteur auteur = auteurService.findById(Auteur.class, Integer.valueOf(auteurId));
+				if (auteur == null) {
+					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+					response.getWriter().append(
+							"{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Auteur not found\"}");
+				} else {
+					livre.setTitre(titre);
+					livre.setDatePublication(datePublication);
+					livre.setDescription(description);
+					livre.setCategorie(categorie);
+					livre.setAuteur(auteur);
+					livre.setExemplaires(exemplaires);
+					livre.setExemplairesDispo(exemplairesDispo);
 
-				response.setStatus(HttpServletResponse.SC_OK);
-				response.getWriter().append("{\"status\": \" " + response.getStatus()
-						+ " \", \"description\" : \"Livre was updated !\"}");
+					livreService.update(livre);
 
+					response.setStatus(HttpServletResponse.SC_OK);
+
+					response.getWriter().append("{\"status\": \"" + response.getStatus()
+							+ "\", \"description\" : \"Livre was updated ! \"}");
+				}
 			}
 		}
 	}
-	
+
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		response.setContentType("application/json");
 
-		Livre livre = livreService.findById(Livre.class, Integer.parseInt(request.getPathInfo().substring(1)));
+		String livreIdFromUrl = request.getPathInfo().substring(1);
+		
+		Livre livre = livreService.findById(Livre.class, Integer.parseInt(livreIdFromUrl));
 		if (livre == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			response.getWriter()
-					.append("{\"status\": \" " + response.getStatus() + " \", \"description\" : \"Livre not found\"}");
+					.append("{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Livre not found\"}");
 		} else {
 			livreService.delete(livre);
 
 			response.setStatus(HttpServletResponse.SC_OK);
-			response.getWriter().append("{\"status\": \" " + response.getStatus()
-					+ " \", \"description\" : \"Livre was deleted !\"}");
+
+			response.getWriter().append(
+					"{\"status\": \"" + response.getStatus() + "\", \"description\" : \"Livre was deleted !\"}");
 		}
 	}
 
