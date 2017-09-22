@@ -34,15 +34,30 @@ public class LivresServlet extends HttpServlet {
 
 		if (request.getQueryString() != null) {
 			String url = request.getQueryString();
+			System.out.println("URLLLLLLLLLLLLLLL = " + url);
 
 			String[] paramParts = url.split("&");
-			for (String part : paramParts) {
-				String[] parts = part.split("=");
-				String key = parts[0];
-				String value = parts[1];
+			
+			System.out.println("paramParts[0] = " + paramParts[0]);
+			System.out.println("paramParts[1] = " + paramParts[1]);
+			
+			if (paramParts[0].startsWith("sort") && paramParts[1].startsWith("order")) {
 
-				if (key.equalsIgnoreCase("categ")) {
-					livres = service.findByCategorie(value);
+				for (String part : paramParts) {
+					String[] parts = part.split("=");
+					String value = parts[1];
+
+					livres = service.findOrderedByDateAsc(value);
+				}
+			} else {
+				for (String part : paramParts) {
+					String[] parts = part.split("=");
+					String key = parts[0];
+					String value = parts[1];
+
+					if (key.equalsIgnoreCase("categ")) {
+						livres = service.findByCategorie(value);
+					}
 				}
 			}
 		} else {

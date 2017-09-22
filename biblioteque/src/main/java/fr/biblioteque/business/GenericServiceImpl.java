@@ -54,4 +54,8 @@ public class GenericServiceImpl<T> implements GenericService<T> {
 	public List<Livre> findByCategorie(String categorie) {
 		return EntityManagerInstance.getInstance().createNamedQuery("livre.findByCategorie", Livre.class).setParameter("categorie", categorie).getResultList();
 	}
+	
+	public List<Livre> findOrderedByDateAsc(String date) {
+		return EntityManagerInstance.getInstance().createNamedQuery("livre.orderByDate", Livre.class).setParameter("datePublication", date).getResultList();
+	}
 }

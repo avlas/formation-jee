@@ -20,4 +20,6 @@ public interface GenericService<T> {
 	List<Auteur> findByLangue(String langue);
 	
 	List<Livre> findByCategorie(String categorie);
+	
+	List<Livre> findOrderedByDateAsc(String date);
 }
